@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contador de Tempo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #ffffff;
+            text-align: center;
+            background: linear-gradient(135deg, #f8d3e3, #ffebee);
+            animation: gradientAnimation 15s ease infinite;
+            font-family: 'Roboto', sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            padding: 20px;
+            margin-top: 250px; /* Aumentando a margem superior */
+            margin-bottom: 50px; /* Margem inferior para dispositivos menores */
+        }
+        .counter {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            color: #333;
+            position: relative;
+            opacity: 1;
+            animation: slideIn 0.5s forwards;
+        }
+        .names {
+            font-size: 2.5rem;
+            font-family: 'Pacifico', cursive;
+            margin-bottom: 15px;
+            color: #ff6f61;
+        }
+        .clock {
+            width: 220px;
+            height: 220px;
+            border: 8px solid #ff6f61;
+            border-radius: 50%;
+            position: relative;
+            margin: 0 auto;
+            background: #fff;
+        }
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            background: #ff6f61;
+            border-radius: 10px;
+            transition: transform 0.5s;
+        }
+        .hand.hour {
+            width: 8px;
+            height: 50px;
+        }
+        .hand.minute {
+            width: 6px;
+            height: 70px;
+        }
+        .hand.second {
+            width: 4px;
+            height: 90px;
+            background: #f7c6c7;
+        }
+        .time-total {
+            font-size: 1.5rem;
+            margin-top: 20px;
+            color: #ff6f61;
+        }
+        .message {
+            font-size: 1.2rem;
+            color: #333;
+            margin-top: 20px;
+            font-style: italic;
+            height: auto; /* Deixa a altura automática */
+            min-height: 100px; /* Altura mínima para a mensagem */
+        }
+        .audio-button {
+            background: transparent;
+            border: none;
+            color: #ff6f61;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .audio-button:hover {
+            transform: scale(1.1);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @media (max-width: 600px) {
+            .names {
+                font-size: 2rem; /* Reduzindo o tamanho da fonte em dispositivos menores */
+            }
+            .time-total {
+                font-size: 1.2rem; /* Ajustando o tamanho da fonte para o tempo total */
+            }
+            .message {
+                font-size: 1rem; /* Ajustando o tamanho da fonte da mensagem */
+                min-height: 80px; /* Altura mínima ajustada para dispositivos menores */
+            }
+        }
+    </style>
+</head>
+<body>
+
+<audio id="background-audio" loop>
+    <source src="In My Life (Remastered 2009).mp3" type="audio/mp3">
+    Seu navegador não suporta o elemento de áudio.
+</audio>
+
+<div class="container">
+    <div class="counter">
+        <div class="names"><u> Lucas e Ingrid</u></div>
+        <h2>Nosso Tempo Juntos</h2>
+        <div class="clock" id="clock">
+            <div class="hand hour" id="hour-hand"></div>
+            <div class="hand minute" id="minute-hand"></div>
+            <div class="hand second" id="second-hand"></div>
+        </div>
+        <div class="time-total" id="time-total"></div>
+        <div class="message">
+            Em cada segundo que passo ao seu lado, sinto como na canção 'In My Life' dos Beatles, onde se fala sobre como algumas memórias são eternas. Dedico a você cada segundo, pois, assim como na música, você é uma das coisas mais especiais que já encontrei na minha vida.
+        </div>
+        <button id="toggle-audio" class="audio-button mt-3">
+            <i class="fas fa-play" id="audio-icon"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+    const startDate = new Date('2024-07-24T00:00:00');
+    
+    function updateClock() {
+        const now = new Date();
+        const difference = now - startDate;
+
+        if (difference < 0) {
+            document.getElementById('hour-hand').style.transform = "rotate(90deg)";
+            document.getElementById('minute-hand').style.transform = "rotate(180deg)";
+            document.getElementById('second-hand').style.transform = "rotate(270deg)";
+            document.getElementById('time-total').innerText = "Ainda não começou!";
+            return;
+        }
+
+        const totalSeconds = Math.floor(difference / 1000);
+        const totalMinutes = Math.floor(totalSeconds / 60);
+        const totalHours = Math.floor(totalMinutes / 60);
+        const totalDays = Math.floor(totalHours / 24);
+
+        const seconds = totalSeconds % 60;
+        const minutes = totalMinutes % 60;
+        const hours = totalHours % 24;
+
+        // Ajustar a rotação dos ponteiros
+        document.getElementById('hour-hand').style.transform = `rotate(${90 + (hours * 30) + (minutes / 2)}deg)`;
+        document.getElementById('minute-hand').style.transform = `rotate(${180 + (minutes * 6)}deg)`;
+        document.getElementById('second-hand').style.transform = `rotate(${270 + (seconds * 6)}deg)`;
+
+        // Atualizar o tempo total
+        document.getElementById('time-total').innerText = 
+            `${totalDays} dias, ${hours} horas, ${minutes} minutos e ${seconds} segundos`;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock(); // Atualiza imediatamente ao carregar
+
+    // Controlar o áudio
+    const audio = document.getElementById('background-audio');
+    const toggleButton = document.getElementById('toggle-audio');
+    const audioIcon = document.getElementById('audio-icon');
+
+    toggleButton.addEventListener('click', () => {
+        if (audio.paused) {
+            audio.play();
+            audioIcon.classList.remove('fa-play');
+            audioIcon.classList.add('fa-pause');
+        } else {
+            audio.pause();
+            audioIcon.classList.remove('fa-pause');
+            audioIcon.classList.add('fa-play');
+        }
+    });
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
